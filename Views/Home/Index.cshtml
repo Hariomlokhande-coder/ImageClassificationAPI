@@ -1,0 +1,528 @@
+@{
+    ViewData["Title"] = "Image Classifier";
+}
+
+<div class="row justify-content-center fade-in">
+    <div class="col-xl-11">
+        <div class="hero-shell glass-card p-4 p-lg-5 mb-4">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-7">
+                    <span class="eyebrow">Smart Demo Workspace</span>
+                    <h1 class="hero-title mt-3 mb-3">Train fast, test quickly, and keep the UI simple.</h1>
+                    <p class="hero-copy mb-0">
+                        This dashboard gives you a clean light-theme workflow for retraining your model and predicting a label from any uploaded image without jumping into Swagger every time.
+                    </p>
+                </div>
+                <div class="col-lg-5">
+                    <div class="hero-stats">
+                        <div class="stat-tile">
+                            <span class="stat-label">Mode</span>
+                            <strong>Train + Predict</strong>
+                        </div>
+                        <div class="stat-tile">
+                            <span class="stat-label">Model Flow</span>
+                            <strong>Fast ML.NET</strong>
+                        </div>
+                        <div class="stat-tile">
+                            <span class="stat-label">Best Use</span>
+                            <strong>Demo Speed</strong>
+                        </div>
+                        <div class="stat-tile">
+                            <span class="stat-label">Last Accuracy</span>
+                            <strong id="heroAccuracy">Not trained yet</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <div class="glass-card p-4 h-100">
+                    <div class="section-heading">
+                        <span class="section-kicker">Prediction</span>
+                        <h5>Upload Image</h5>
+                        <p>Select an image and send it straight to the prediction API.</p>
+                    </div>
+
+                    <form id="uploadForm" enctype="multipart/form-data">
+                        <label id="dropZone" for="imageFile" class="upload-zone mb-4">
+                            <input type="file" id="imageFile" name="file" accept="image/*" class="d-none" required>
+                            <div class="upload-content text-center py-5">
+                                <div class="icon-circle mb-3">
+                                    <i class="fa-solid fa-image fa-2x upload-icon"></i>
+                                </div>
+                                <p class="mb-1 fw-semibold">Click to upload or drag and drop</p>
+                                <p class="small text-muted">JPG, JPEG, PNG, BMP</p>
+                            </div>
+                        </label>
+
+                        <div class="preview-container mb-4 d-none">
+                            <img id="imagePreview" src="#" alt="Preview" class="img-fluid preview-image" />
+                            <button type="button" id="removeBtn" class="btn btn-sm btn-outline-danger rounded-pill mt-3">
+                                <i class="fa-solid fa-trash me-1"></i> Remove
+                            </button>
+                        </div>
+
+                        <button type="submit" class="btn btn-premium w-100" id="btnPredict" disabled>
+                            <i class="fa-solid fa-magnifying-glass-chart me-2"></i> Predict Category
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="glass-card p-4 h-100 d-flex flex-column">
+                    <div class="section-heading">
+                        <span class="section-kicker">Result</span>
+                        <h5>Prediction Output</h5>
+                        <p>See the predicted class, confidence, and latest uploaded preview.</p>
+                    </div>
+
+                    <div id="emptyResult" class="flex-grow-1 d-flex flex-column align-items-center justify-content-center text-center empty-state">
+                        <i class="fa-solid fa-compass-drafting fa-3x mb-3"></i>
+                        <p class="mb-0">Prediction will appear here after upload.</p>
+                    </div>
+
+                    <div id="loadingResult" class="d-none flex-grow-1 flex-column align-items-center justify-content-center">
+                        <div class="spinner-border mb-3 loader-spinner" style="width: 3rem; height: 3rem;" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="fw-semibold mb-0">Running prediction...</p>
+                    </div>
+
+                    <div id="resultBox" class="d-none flex-grow-1">
+                        <div class="result-card p-4 rounded-4">
+                            <div class="row g-4 align-items-center">
+                                <div class="col-md-7">
+                                    <span class="result-label">Detected Category</span>
+                                    <h2 id="predictionText" class="result-title mb-3"></h2>
+                                    <div class="confidence-wrap">
+                                        <div class="d-flex justify-content-between mb-2 small">
+                                            <span class="text-muted">Confidence</span>
+                                            <span id="confidenceValue">0%</span>
+                                        </div>
+                                        <div class="progress confidence-track">
+                                            <div id="confidenceBar" class="progress-bar confidence-bar" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-5">
+                                    <div class="result-preview-shell">
+                                        <img id="resultPreview" src="" alt="Result preview" class="img-fluid result-preview d-none" />
+                                        <div id="resultPreviewPlaceholder" class="result-preview-placeholder">
+                                            <i class="fa-solid fa-camera-retro"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card p-4 mt-4">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+                <div>
+                    <span class="section-kicker">Training</span>
+                    <h5 class="mb-1">Retrain Model</h5>
+                    <p class="text-muted mb-0">Use the current dataset folders and refresh the saved model for your next predictions.</p>
+                </div>
+                <div class="d-flex flex-column align-items-lg-end gap-2">
+                    <div class="model-metrics text-lg-end">
+                        <strong id="modelAccuracy" class="metrics-value">Accuracy not available</strong>
+                        <div id="modelMeta" class="small text-muted">Train once to display latest model metrics.</div>
+                    </div>
+                    <button class="btn btn-premium" id="btnTrain">
+                        <i class="fa-solid fa-bolt me-2"></i> Start Training
+                    </button>
+                    <span id="trainStatus" class="small text-muted"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="trainModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-card border-0">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title">Train Model</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-muted">This will retrain the model using your current `Dataset` folders. Keep the app open until the request finishes.</p>
+                <div id="trainProgress" class="d-none">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="spinner-border spinner-border-sm me-2 loader-spinner"></div>
+                        <span>Training in progress...</span>
+                    </div>
+                    <div class="progress thin-progress">
+                        <div class="progress-bar progress-bar-animated progress-bar-striped confidence-bar w-100"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-premium" id="confirmTrain">Start Retraining</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hero-shell {
+        overflow: hidden;
+        position: relative;
+    }
+
+    .eyebrow,
+    .section-kicker,
+    .result-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--accent);
+    }
+
+    .hero-title {
+        font-size: clamp(2.2rem, 4vw, 4.2rem);
+        line-height: 1;
+        font-weight: 800;
+        letter-spacing: -0.05em;
+        max-width: 10ch;
+    }
+
+    .hero-copy,
+    .section-heading p {
+        color: var(--text-muted);
+        max-width: 60ch;
+    }
+
+    .hero-stats {
+        display: grid;
+        gap: 0.9rem;
+    }
+
+    .stat-tile {
+        background: rgba(255,255,255,0.66);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 1rem 1.1rem;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+    }
+
+    .stat-label {
+        display: block;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-muted);
+        margin-bottom: 0.3rem;
+    }
+
+    .section-heading h5 {
+        font-size: 1.35rem;
+        font-weight: 800;
+        margin-bottom: 0.35rem;
+    }
+
+    .upload-zone {
+        border: 2px dashed rgba(15, 118, 110, 0.22);
+        border-radius: 20px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(247,250,249,0.95));
+        display: block;
+    }
+
+    .upload-zone:hover {
+        border-color: var(--accent);
+        background: rgba(20, 184, 166, 0.06);
+    }
+
+    .upload-zone.dragover {
+        border-color: var(--accent);
+        background: rgba(20, 184, 166, 0.10);
+        transform: scale(1.02);
+    }
+
+    .icon-circle {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--accent-soft), #ffffff);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        border: 1px solid rgba(15, 118, 110, 0.12);
+    }
+
+    .upload-icon {
+        color: var(--accent);
+    }
+
+    .upload-content {
+        pointer-events: none;
+    }
+
+    .preview-image {
+        width: 100%;
+        max-height: 280px;
+        object-fit: cover;
+        border-radius: 18px;
+        border: 1px solid var(--line);
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+    }
+
+    .result-card {
+        background: linear-gradient(145deg, #fffdf8, #f8fffd);
+        border: 1px solid rgba(15, 118, 110, 0.14);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+    }
+
+    .result-title {
+        font-size: clamp(2rem, 4vw, 3.4rem);
+        font-weight: 800;
+        letter-spacing: -0.05em;
+        color: #0f172a;
+    }
+
+    .confidence-track {
+        height: 12px;
+        background: rgba(15, 23, 42, 0.08);
+        border-radius: 999px;
+    }
+
+    .confidence-bar {
+        background: linear-gradient(90deg, #0f766e, #14b8a6);
+        border-radius: 999px;
+    }
+
+    .result-preview-shell {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        min-height: 220px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .result-preview {
+        width: 100%;
+        height: 220px;
+        object-fit: cover;
+    }
+
+    .result-preview-placeholder {
+        color: var(--text-muted);
+        font-size: 2rem;
+    }
+
+    .empty-state {
+        color: var(--text-muted);
+    }
+
+    .loader-spinner {
+        color: var(--accent);
+    }
+
+    .thin-progress {
+        height: 5px;
+    }
+
+    .model-metrics {
+        padding: 0.85rem 1rem;
+        border-radius: 16px;
+        background: rgba(255,255,255,0.62);
+        border: 1px solid var(--line);
+        min-width: 260px;
+    }
+
+    .metrics-value {
+        display: block;
+        font-size: 1.05rem;
+        color: #0f172a;
+    }
+
+    .modal-content {
+        background: rgba(255,255,255,0.92) !important;
+        backdrop-filter: blur(16px) !important;
+    }
+
+    @@media (max-width: 991px) {
+        .hero-title {
+            max-width: none;
+        }
+    }
+</style>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            const $dropZone = $('#dropZone');
+            const $fileInput = $('#imageFile');
+            const $previewContainer = $('.preview-container');
+            const $imagePreview = $('#imagePreview');
+            const $resultPreview = $('#resultPreview');
+            const $resultPreviewPlaceholder = $('#resultPreviewPlaceholder');
+            const $btnPredict = $('#btnPredict');
+            const $removeBtn = $('#removeBtn');
+            const $uploadForm = $('#uploadForm');
+            const $heroAccuracy = $('#heroAccuracy');
+            const $modelAccuracy = $('#modelAccuracy');
+            const $modelMeta = $('#modelMeta');
+            const $trainStatus = $('#trainStatus');
+
+            function updateModelMetrics(summary) {
+                if (!summary || !summary.hasSummary) {
+                    $heroAccuracy.text('Not trained yet');
+                    $modelAccuracy.text('Accuracy not available');
+                    $modelMeta.text('Train once to display latest model metrics.');
+                    return;
+                }
+
+                $heroAccuracy.text(summary.microAccuracy);
+                $modelAccuracy.text(summary.microAccuracy + ' micro accuracy');
+                $modelMeta.text(summary.trainingTime + ' training time • ' + summary.imageCount + ' images • ' + summary.labelCount + ' labels');
+            }
+
+            function loadModelSummary() {
+                $.ajax({
+                    url: '/api/ImageClassification/summary',
+                    type: 'GET',
+                    success: function (response) {
+                        updateModelMetrics(response);
+                    }
+                });
+            }
+
+            loadModelSummary();
+
+            $dropZone.on('dragover', (e) => {
+                e.preventDefault();
+                $dropZone.addClass('dragover');
+            });
+
+            $dropZone.on('dragleave', () => $dropZone.removeClass('dragover'));
+
+            $dropZone.on('drop', (e) => {
+                e.preventDefault();
+                $dropZone.removeClass('dragover');
+                const files = e.originalEvent.dataTransfer.files;
+                if (files.length) {
+                    $fileInput[0].files = files;
+                    handleFileSelection(files[0]);
+                }
+            });
+
+            $fileInput.on('change', function() {
+                if (this.files.length) handleFileSelection(this.files[0]);
+            });
+
+            function handleFileSelection(file) {
+                if (!file.type.startsWith('image/')) {
+                    alert('Please select an image file.');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    $imagePreview.attr('src', e.target.result);
+                    $previewContainer.removeClass('d-none');
+                    $dropZone.addClass('d-none');
+                    $btnPredict.prop('disabled', false);
+                };
+                reader.readAsDataURL(file);
+            }
+
+            $removeBtn.on('click', () => {
+                $fileInput.val('');
+                $previewContainer.addClass('d-none');
+                $dropZone.removeClass('d-none');
+                $btnPredict.prop('disabled', true);
+                $('#resultBox').addClass('d-none');
+                $('#emptyResult').removeClass('d-none');
+                $resultPreview.addClass('d-none').attr('src', '');
+                $resultPreviewPlaceholder.removeClass('d-none');
+            });
+
+            $uploadForm.on('submit', function (e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                $btnPredict.prop('disabled', true).html('<i class="fa-solid fa-circle-notch fa-spin me-2"></i> Predicting...');
+                
+                $('#emptyResult').addClass('d-none');
+                $('#resultBox').addClass('d-none');
+                $('#loadingResult').removeClass('d-none').addClass('d-flex');
+
+                $.ajax({
+                    url: '/api/ImageClassification/predict',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        $('#loadingResult').removeClass('d-flex').addClass('d-none');
+                        $('#predictionText').text(response.category || 'Unknown');
+                        $('#confidenceValue').text(response.confidence || 'N/A');
+                        $('#confidenceBar').css('width', response.confidence || '0%');
+                        $resultPreview.attr('src', $('#imagePreview').attr('src')).removeClass('d-none');
+                        $resultPreviewPlaceholder.addClass('d-none');
+                        $('#resultBox').removeClass('d-none').hide().fadeIn(300);
+                        $btnPredict.prop('disabled', false).html('<i class="fa-solid fa-magnifying-glass-chart me-2"></i> Predict Category');
+                    },
+                    error: function (xhr) {
+                        alert('Error: ' + (xhr.responseJSON?.message || 'Prediction failed'));
+                        $btnPredict.prop('disabled', false).html('<i class="fa-solid fa-magnifying-glass-chart me-2"></i> Predict Category');
+                        $('#loadingResult').removeClass('d-flex').addClass('d-none');
+                        $('#emptyResult').removeClass('d-none');
+                    }
+                });
+            });
+
+            const trainModal = new bootstrap.Modal(document.getElementById('trainModal'));
+            
+            $('#btnTrain').on('click', () => trainModal.show());
+
+            $('#confirmTrain').on('click', function() {
+                const $btn = $(this);
+                $btn.prop('disabled', true).text('Retraining...');
+                $('#trainProgress').removeClass('d-none');
+
+                $.ajax({
+                    url: '/api/ImageClassification/train',
+                    type: 'POST',
+                    success: function (response) {
+                        trainModal.hide();
+                        $btn.prop('disabled', false).text('Start Retraining');
+                        $('#trainProgress').addClass('d-none');
+                        $trainStatus.text('Last training: ' + response.microAccuracy + ' accuracy');
+                        updateModelMetrics({
+                            hasSummary: true,
+                            microAccuracy: response.microAccuracy,
+                            trainingTime: response.trainingTime,
+                            imageCount: response.imageCount,
+                            labelCount: response.labelCount
+                        });
+                        alert('Model retrained successfully!\nAccuracy: ' + response.microAccuracy);
+                    },
+                    error: function (xhr) {
+                        alert('Training failed: ' + (xhr.responseJSON?.message || 'Unknown error'));
+                        $btn.prop('disabled', false).text('Start Retraining');
+                        $('#trainProgress').addClass('d-none');
+                    }
+                });
+            });
+        });
+    </script>
+}

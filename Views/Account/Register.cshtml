@@ -1,0 +1,149 @@
+@{
+    ViewData["Title"] = "Register";
+}
+
+<style>
+    .auth-shell {
+        min-height: calc(100vh - 220px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .auth-card {
+        max-width: 1040px;
+        width: 100%;
+        overflow: hidden;
+        border-radius: 28px;
+    }
+
+    .auth-panel-register {
+        background: linear-gradient(165deg, #1d4ed8 0%, #2563eb 55%, #93c5fd 100%);
+        color: white;
+        padding: 3rem;
+        height: 100%;
+    }
+
+    .auth-form-panel {
+        background: rgba(255, 255, 255, 0.96);
+        padding: 3rem;
+    }
+
+    .auth-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(255, 255, 255, 0.16);
+        border: 1px solid rgba(255, 255, 255, 0.24);
+        border-radius: 999px;
+        padding: 0.5rem 0.9rem;
+        font-size: 0.92rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .auth-form-panel .form-control {
+        border-radius: 16px;
+        border: 1px solid rgba(15, 23, 42, 0.10);
+        min-height: 58px;
+        box-shadow: none;
+    }
+
+    .auth-form-panel .form-control:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.14);
+    }
+
+    .auth-submit-register {
+        width: 100%;
+        border: 0;
+        border-radius: 16px;
+        padding: 0.95rem 1.25rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #1d4ed8, #2563eb);
+        color: white;
+        box-shadow: 0 16px 32px rgba(37, 99, 235, 0.24);
+    }
+
+    .auth-submit-register:hover {
+        filter: brightness(1.03);
+        color: white;
+    }
+
+    .auth-link {
+        color: #1d4ed8;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .auth-link:hover {
+        text-decoration: underline;
+    }
+
+    @@media (max-width: 767.98px) {
+        .auth-panel-register,
+        .auth-form-panel {
+            padding: 2rem 1.5rem;
+        }
+    }
+</style>
+
+<section class="auth-shell fade-in">
+    <div class="glass-card auth-card">
+        <div class="row g-0">
+            <div class="col-lg-5">
+                <div class="auth-panel-register d-flex flex-column justify-content-center">
+                    <div class="auth-chip">
+                        <i class="fa-solid fa-user-plus"></i>
+                        New account setup
+                    </div>
+                    <h1 class="display-6 fw-bold mb-3">Create your account</h1>
+                    <p class="mb-4 fs-6 text-white-50">
+                        Join Vision AI to upload training data, build image models, and test predictions in one clean workspace.
+                    </p>
+                    <div class="small text-white-50">
+                        Pick a username, add your email, and create a password to get started.
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-7">
+                <div class="auth-form-panel h-100 d-flex flex-column justify-content-center">
+                    <div class="mb-4">
+                        <h2 class="fw-bold mb-2">Register</h2>
+                        <p class="text-muted mb-0">Set up your Vision AI account.</p>
+                    </div>
+                    <form asp-controller="Account" asp-action="Register" method="post">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                        <div class="mb-3">
+                            <label for="inputUsername" class="form-label fw-semibold">Username</label>
+                            <input type="text" name="username" class="form-control" id="inputUsername" placeholder="Username" autocomplete="username" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputEmail" class="form-label fw-semibold">Email address</label>
+                            <input type="email" name="email" class="form-control" id="inputEmail" placeholder="name@example.com" autocomplete="email" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputPassword" class="form-label fw-semibold">Password</label>
+                            <input type="password" name="password" class="form-control" id="inputPassword" placeholder="Password" autocomplete="new-password" required />
+                        </div>
+                        <button type="submit" class="auth-submit-register mt-2">Create account</button>
+                    </form>
+                    <p class="text-muted mt-4 mb-0">
+                        Already have an account?
+                        <a class="auth-link" asp-controller="Account" asp-action="Login">Login</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("form").on("submit", function () {
+                $(this).find("button[type=submit]").prop("disabled", true).text("Registering...");
+            });
+        });
+    </script>
+}

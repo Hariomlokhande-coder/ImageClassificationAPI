@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Vision AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <style>
+        :root {
+            --cream: #fffdf7;
+            --surface: rgba(255, 255, 255, 0.82);
+            --surface-strong: #ffffff;
+            --line: rgba(15, 23, 42, 0.08);
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --accent: #0f766e;
+            --accent-soft: #ccfbf1;
+            --warm: #f59e0b;
+            --warm-soft: #fef3c7;
+            --shadow: 0 24px 60px rgba(15, 23, 42, 0.10);
+        }
+
+        body {
+            background:
+                radial-gradient(circle at top left, rgba(20, 184, 166, 0.16), transparent 28%),
+                radial-gradient(circle at top right, rgba(245, 158, 11, 0.18), transparent 24%),
+                linear-gradient(180deg, #fffefb 0%, #f5f7f4 100%);
+            color: var(--text-main);
+            font-family: 'Manrope', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            background: rgba(255, 253, 247, 0.76);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--line);
+            padding: 1rem 0 0.9rem;
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            font-size: 1.5rem;
+            color: var(--text-main);
+        }
+
+        .main-container {
+            padding-top: 3rem;
+            padding-bottom: 4rem;
+        }
+
+        .glass-card {
+            background: var(--surface);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 28px 64px rgba(15, 23, 42, 0.12);
+        }
+
+        .btn-premium {
+            background: linear-gradient(135deg, var(--accent), #14b8a6);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 16px 30px rgba(15, 118, 110, 0.24);
+        }
+
+        .btn-premium:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 22px 32px rgba(15, 118, 110, 0.28);
+            color: white;
+            filter: brightness(1.04);
+        }
+
+        .btn-premium:disabled {
+            background: #94a3b8;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        @@keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .blob {
+            position: fixed;
+            width: 420px;
+            height: 420px;
+            border-radius: 50%;
+            z-index: -1;
+            filter: blur(50px);
+            opacity: 0.8;
+        }
+
+        .blob-1 {
+            top: -120px;
+            right: -120px;
+            background: radial-gradient(circle, rgba(20, 184, 166, 0.18) 0%, transparent 68%);
+        }
+
+        .blob-2 {
+            bottom: -120px;
+            left: -120px;
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.18) 0%, transparent 68%);
+        }
+
+        .app-badge {
+            background: var(--warm-soft);
+            color: #92400e;
+            border: 1px solid rgba(245, 158, 11, 0.25);
+        }
+
+        footer {
+            border-top: 1px solid var(--line);
+        }
+    </style>
+</head>
+<body>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <nav class="navbar sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fa-solid fa-sparkles me-2" style="color:#0f766e;"></i>Vision AI
+            </a>
+            <div class="d-flex align-items-center">
+                <span class="badge rounded-pill app-badge px-3 py-2 me-3">
+                    <i class="fa-solid fa-sun me-1"></i> Light Workspace
+                </span>
+                <div class="navbar-nav flex-row">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <span class="nav-link text-main me-3">
+                            <i class="fa-solid fa-user me-1"></i> @User.Identity.Name
+                        </span>
+                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-outline-danger btn-sm border-0">
+                                <i class="fa-solid fa-right-from-bracket"></i> Logout
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <a class="nav-link text-main me-3" asp-controller="Account" asp-action="Login">
+                            <i class="fa-solid fa-right-to-bracket"></i> Login
+                        </a>
+                        <a class="nav-link text-main" asp-controller="Account" asp-action="Register">
+                            <i class="fa-solid fa-user-plus"></i> Register
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-container">
+        <main role="main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="mt-auto py-4 text-center text-muted">
+        <div class="container">
+            <p class="mb-0 small">&copy; 2026 Vision AI - Fast image training and prediction demo</p>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,6 @@
+@ImageClassificationAPI_HostAddress = http://localhost:5271
+
+GET {{ImageClassificationAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
